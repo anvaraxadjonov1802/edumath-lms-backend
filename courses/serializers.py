@@ -8,6 +8,7 @@ from .models import (
     Module,
     Question,
     Reference,
+    TestResult,
     Topic,
 )
 
@@ -232,4 +233,109 @@ class GlossaryTermSerializer(serializers.ModelSerializer):
             "term_en",
             "term_ru",
             "definition",
+        )
+
+
+class SubmitAnswerSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    answer_id = serializers.IntegerField()
+
+
+class SubmitTestSerializer(serializers.Serializer):
+    answers = SubmitAnswerSerializer(many=True)
+
+    def validate_answers(self, value):
+        if not value:
+            raise serializers.ValidationError("Kamida bitta javob yuborilishi kerak")
+
+        topic = self.context.get("topic")
+
+        active_question_ids = set(
+            topic.questions.filter(is_active=True).values_list("id", flat=True)
+        )
+
+        if not active_question_ids:
+            raise serializers.ValidationError("Bu mavzu uchun faol test savollari mavjud emas")
+
+        submitted_question_ids = []
+
+        for item in value:
+            question_id = item.get("question_id")
+            answer_id = item.get("answer_id")
+
+            if question_id not in active_question_ids:
+                raise serializers.ValidationError(
+                    f"{question_id} ID li savol ushbu mavzuga tegishli emas"
+                )
+
+            if question_id in submitted_question_ids:
+                raise serializers.ValidationError(
+                    f"{question_id} ID li savolga takror javob yuborilgan"
+                )
+
+            answer_exists = Answer.objects.filter(
+                id=answer_id,
+                question_id=question_id,
+            ).exists()
+
+            if not answer_exists:
+                raise serializers.ValidationError(
+                    f"{answer_id} ID li javob {question_id} ID li savolga tegishli emas"
+                )
+
+            submitted_question_ids.append(question_id)
+
+        return value
+
+    def save(self, **kwargs):
+        user = kwargs.get("user")
+        topic = self.context.get("topic")
+        answers = self.validated_data["answers"]
+
+        total_questions = topic.questions.filter(is_active=True).count()
+        answered_questions = len(answers)
+
+        submitted_answer_ids = [item["answer_id"] for item in answers]
+
+        score = Answer.objects.filter(
+            id__in=submitted_answer_ids,
+            is_correct=True,
+        ).count()
+
+        percentage = round((score / total_questions) * 100, 2)
+
+        result = TestResult.objects.create(
+            user=user,
+            topic=topic,
+            score=score,
+            total_questions=total_questions,
+            percentage=percentage,
+        )
+
+        return {
+            "result": result,
+            "score": score,
+            "total_questions": total_questions,
+            "answered_questions": answered_questions,
+            "percentage": percentage,
+        }
+
+
+class TestResultSerializer(serializers.ModelSerializer):
+    topic_title = serializers.CharField(source="topic.title", read_only=True)
+    module_title = serializers.CharField(source="topic.module.title", read_only=True)
+    course_title = serializers.CharField(source="topic.module.course.title", read_only=True)
+
+    class Meta:
+        model = TestResult
+        fields = (
+            "id",
+            "topic",
+            "topic_title",
+            "module_title",
+            "course_title",
+            "score",
+            "total_questions",
+            "percentage",
+            "created_at",
         )

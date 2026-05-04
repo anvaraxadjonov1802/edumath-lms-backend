@@ -1,6 +1,9 @@
 from django.db.models import Q
-from rest_framework import generics, permissions
+
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import (
     Course,
@@ -8,6 +11,7 @@ from .models import (
     Material,
     Question,
     Reference,
+    TestResult,
     Topic,
 )
 from .serializers import (
@@ -17,6 +21,8 @@ from .serializers import (
     MaterialSerializer,
     QuestionSerializer,
     ReferenceSerializer,
+    SubmitTestSerializer,
+    TestResultSerializer,
     TopicDetailSerializer,
     TopicListSerializer,
 )
@@ -183,3 +189,55 @@ class GlossaryTermListAPIView(generics.ListAPIView):
             )
 
         return queryset
+    
+
+class SubmitTestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, topic_id):
+        try:
+            topic = Topic.objects.get(
+                id=topic_id,
+                is_active=True,
+                module__is_active=True,
+                module__course__is_active=True,
+            )
+        except Topic.DoesNotExist:
+            raise NotFound("Mavzu topilmadi")
+
+        serializer = SubmitTestSerializer(
+            data=request.data,
+            context={"topic": topic},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        test_data = serializer.save(user=request.user)
+        result = test_data["result"]
+
+        return Response(
+            {
+                "message": "Test muvaffaqiyatli yakunlandi",
+                "result": TestResultSerializer(result).data,
+                "summary": {
+                    "score": test_data["score"],
+                    "total_questions": test_data["total_questions"],
+                    "answered_questions": test_data["answered_questions"],
+                    "percentage": test_data["percentage"],
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class MyTestResultsAPIView(generics.ListAPIView):
+    serializer_class = TestResultSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return TestResult.objects.filter(
+            user=self.request.user,
+        ).select_related(
+            "topic",
+            "topic__module",
+            "topic__module__course",
+        ).order_by("-created_at")
