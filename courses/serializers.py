@@ -325,6 +325,7 @@ class TestResultSerializer(serializers.ModelSerializer):
     topic_title = serializers.CharField(source="topic.title", read_only=True)
     module_title = serializers.CharField(source="topic.module.title", read_only=True)
     course_title = serializers.CharField(source="topic.module.course.title", read_only=True)
+    grade = serializers.SerializerMethodField()
 
     class Meta:
         model = TestResult
@@ -337,5 +338,15 @@ class TestResultSerializer(serializers.ModelSerializer):
             "score",
             "total_questions",
             "percentage",
+            "grade",
             "created_at",
         )
+
+    def get_grade(self, obj):
+        if obj.percentage >= 90:
+            return "A'lo"
+        if obj.percentage >= 70:
+            return "Yaxshi"
+        if obj.percentage >= 50:
+            return "Qoniqarli"
+        return "Qoniqarsiz"
