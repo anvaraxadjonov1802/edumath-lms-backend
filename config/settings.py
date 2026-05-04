@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Local apps
+    'accounts',
     'courses',
 ]
 
@@ -132,3 +133,16 @@ MEDIA_ROOT = BASE_DIR / 'media'
 Hozircha CORS_ALLOW_ALL_ORIGINS = True qilamiz, frontend ulaganda oson bo‘ladi. Deploy paytida buni xavfsizroq qilamiz.
 '''
 CORS_ALLOW_ALL_ORIGINS = True
+
+AUTH_USER_MODEL = 'accounts.User'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'EduMath LMS <noreply@edumath.uz>'
