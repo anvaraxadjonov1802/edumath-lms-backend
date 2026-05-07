@@ -223,3 +223,12 @@ DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     "EduMath LMS <noreply@edumath.uz>",
 )
+
+EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "smtp").lower()
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+RESEND_FROM_EMAIL = os.getenv(
+    "RESEND_FROM_EMAIL",
+    "EduMath LMS <noreply@edumath.uz>",
+)
+RESEND_REPLY_TO = os.getenv("RESEND_REPLY_TO", "")

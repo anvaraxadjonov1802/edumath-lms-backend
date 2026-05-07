@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from django.core.mail import send_mail
+from .email_utils import send_verification_email
 from rest_framework import serializers
 
 from .models import User
@@ -32,16 +32,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         code = user.generate_verification_code()
 
-        send_mail(
-            subject="EduMath LMS email tasdiqlash kodi",
-            message=f"Sizning tasdiqlash kodingiz: {code}",
-            from_email=None,
-            recipient_list=[user.email],
-            fail_silently=False,
+        send_verification_email(
+            to_email=user.email,
+            code=code,
+            is_resend=False,
         )
 
         return user
-
 
 class VerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -96,12 +93,10 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
     def save(self):
         code = self.user.generate_verification_code()
 
-        send_mail(
-            subject="EduMath LMS yangi tasdiqlash kodi",
-            message=f"Sizning yangi tasdiqlash kodingiz: {code}",
-            from_email=None,
-            recipient_list=[self.user.email],
-            fail_silently=False,
+        send_verification_email(
+            to_email=self.user.email,
+            code=code,
+            is_resend=True,
         )
 
         return self.user
