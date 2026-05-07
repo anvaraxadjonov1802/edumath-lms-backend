@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'corsheaders',
+    'drf_spectacular',
 
     # Local apps
     'accounts',
@@ -154,10 +155,10 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "config.pagination.StandardResultsSetPagination",
     "PAGE_SIZE": 10,
 }
-
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
@@ -168,3 +169,25 @@ DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     "EduMath LMS <noreply@edumath.uz>",
 )
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "EduMath LMS API",
+    "DESCRIPTION": (
+        "Iqtisodchilar uchun matematika fanini o‘rganishga mo‘ljallangan "
+        "ta’lim platformasi backend API dokumentatsiyasi."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": False,
+    },
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SECURITY": [
+        {
+            "BearerAuth": [],
+        }
+    ],
+}
