@@ -5,6 +5,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from drf_spectacular.utils import extend_schema
+
 from .models import (
     Course,
     GlossaryTerm,
@@ -194,6 +196,11 @@ class GlossaryTermListAPIView(generics.ListAPIView):
 class SubmitTestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        request=SubmitTestSerializer,
+        responses={201: TestResultSerializer},
+        tags=["Tests"],
+    )
     def post(self, request, topic_id):
         try:
             topic = Topic.objects.get(
@@ -227,7 +234,7 @@ class SubmitTestAPIView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-
+    
 
 class MyTestResultsAPIView(generics.ListAPIView):
     serializer_class = TestResultSerializer

@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from drf_spectacular.utils import extend_schema
+
 from .serializers import (
     LoginSerializer,
     RegisterSerializer,
@@ -20,6 +22,11 @@ class RegisterView(generics.CreateAPIView):
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        request=VerifyEmailSerializer,
+        responses={200: {"type": "object", "properties": {"message": {"type": "string"}}}},
+        tags=["Auth"],
+    )
     def post(self, request):
         serializer = VerifyEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -34,6 +41,11 @@ class VerifyEmailView(APIView):
 class ResendVerificationCodeView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        request=ResendVerificationCodeSerializer,
+        responses={200: {"type": "object", "properties": {"message": {"type": "string"}}}},
+        tags=["Auth"],
+    )
     def post(self, request):
         serializer = ResendVerificationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -48,6 +60,11 @@ class ResendVerificationCodeView(APIView):
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        request=LoginSerializer,
+        responses={200: UserProfileSerializer},
+        tags=["Auth"],
+    )
     def post(self, request):
         serializer = LoginSerializer(
             data=request.data,
