@@ -30,6 +30,7 @@ class MaterialSerializer(serializers.ModelSerializer):
             "material_type_display",
             "file",
             "file_url",
+            "external_url",
             "order",
             "uploaded_at",
         )

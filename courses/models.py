@@ -111,7 +111,14 @@ class Material(models.Model):
     )
     file = models.FileField(
         upload_to="materials/",
+        blank=True,
+        null=True,
         verbose_name="Fayl"
+    )
+
+    external_url = models.URLField(
+        blank=True,
+        verbose_name="Tashqi fayl havolasi"
     )
     order = models.PositiveIntegerField(default=1, verbose_name="Tartib raqami")
     uploaded_at = models.DateTimeField(auto_now_add=True)

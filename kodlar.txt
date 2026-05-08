@@ -1,0 +1,21 @@
+postgresql://postgres.zhldxqdutlqusbehqglf:anvaraxadjonov1802@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
+
+https://edumath-lms-backend.onrender.com
+
+SECRET_KEY=bu-yerga-kuchli-secret-key
+DEBUG=False
+ALLOWED_HOSTS=edumath-lms-backend.onrender.com
+
+DATABASE_URL=SUPABASE_CONNECTION_STRING
+
+CORS_ALLOW_ALL_ORIGINS=False
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173
+CSRF_TRUSTED_ORIGINS=
+
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+DEFAULT_FROM_EMAIL=EduMath LMS <noreply@edumath.uz>
+
+astm jany hhlu qhnn
+
+
+re_3AEmKt3r_6zoooWoF49JfRMGH71jVA29j
